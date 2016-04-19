@@ -184,7 +184,7 @@ public final class Signal<T> {
         Subscribe to the changes of this signal (.Error only).
         This method is chainable.
     */
-    public func error(g: ErrorType -> Void) -> Signal<T> {
+    public func error(g: ErrorProtocol -> Void) -> Signal<T> {
         subscribe { result in
             switch(result) {
             case .Success(_): return
@@ -215,7 +215,7 @@ public final class Signal<T> {
                 signal.update(.Success((a,b)))
             }
         }
-        let errorHandler = { (error: ErrorType) in
+        let errorHandler = { (error: ErrorProtocol) in
             signal.update(.Error(error))
         }
         self.error(errorHandler)
@@ -246,7 +246,7 @@ public final class Signal<T> {
         Update the content of the signal. This will notify all subscribers of this signal
         about the new value.
      */
-    public func update(error: ErrorType) {
+    public func update(error: ErrorProtocol) {
         update(.Error(error))
     }
     

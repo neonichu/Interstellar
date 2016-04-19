@@ -58,7 +58,7 @@ public extension Signal {
                         signal.update(result)
                     } else {
                         // skip result if there was a newer result
-                        if currentTime.compare(signal.lastCalled!) == .OrderedDescending {
+                        if currentTime.compare(signal.lastCalled!) == .orderedDescending {
                             let s = Signal<T>()
                             s.delay(seconds - timeSinceLastCall!).subscribe(updateIfNeeded(signal))
                             s.update(result)

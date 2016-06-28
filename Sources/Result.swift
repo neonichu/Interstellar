@@ -49,7 +49,7 @@ public enum Result<T> {
         Transform a result into another result using a function. If the result was an error,
         the function will not be executed and the error returned instead.
     */
-    public func map<U>(@noescape f: T -> U) -> Result<U> {
+    public func map<U>(_ f: @noescape(T) -> U) -> Result<U> {
         switch self {
         case let .Success(v): return .Success(f(v))
         case let .Error(error): return .Error(error)
@@ -60,7 +60,7 @@ public enum Result<T> {
         Transform a result into another result using a function. If the result was an error,
         the function will not be executed and the error returned instead.
     */
-    public func map<U>(f:(T, (U->Void))->Void) -> (Result<U>->Void)->Void {
+    public func map<U>(_ f:(T, ((U)->Void))->Void) -> ((Result<U>)->Void)->Void {
         return { g in
             switch self {
             case let .Success(v): f(v){ transformed in
@@ -75,7 +75,7 @@ public enum Result<T> {
         Transform a result into another result using a function. If the result was an error,
         the function will not be executed and the error returned instead.
     */
-    public func flatMap<U>(@noescape f: T -> Result<U>) -> Result<U> {
+    public func flatMap<U>(_ f: @noescape(T) -> Result<U>) -> Result<U> {
         switch self {
         case let .Success(v): return f(v)
         case let .Error(error): return .Error(error)
@@ -86,7 +86,7 @@ public enum Result<T> {
         Transform a result into another result using a function. If the result was an error,
         the function will not be executed and the error returned instead.
     */
-    public func flatMap<U>(@noescape f: T throws -> U) -> Result<U> {
+    public func flatMap<U>(_ f: @noescape(T) throws -> U) -> Result<U> {
         return flatMap { t in
             do {
                 return .Success(try f(t))
@@ -99,7 +99,7 @@ public enum Result<T> {
         Transform a result into another result using a function. If the result was an error,
         the function will not be executed and the error returned instead.
     */
-    public func flatMap<U>(f:(T, (Result<U>->Void))->Void) -> (Result<U>->Void)->Void {
+    public func flatMap<U>(_ f:(T, ((Result<U>)->Void))->Void) -> ((Result<U>)->Void)->Void {
         return { g in
             switch self {
             case let .Success(v): f(v, g)
@@ -112,7 +112,7 @@ public enum Result<T> {
         Call a function with the result as an argument. Use this if the function should be
         executed no matter if the result was a success or not.
     */
-    public func ensure<U>(@noescape f: Result<T> -> Result<U>) -> Result<U> {
+    public func ensure<U>( f: @noescape(Result<T>) -> Result<U>) -> Result<U> {
         return f(self)
     }
     
@@ -120,7 +120,7 @@ public enum Result<T> {
         Call a function with the result as an argument. Use this if the function should be
         executed no matter if the result was a success or not.
     */
-    public func ensure<U>(f:(Result<T>, (Result<U>->Void))->Void) -> (Result<U>->Void)->Void {
+    public func ensure<U>(f:(Result<T>, ((Result<U>)->Void))->Void) -> ((Result<U>)->Void)->Void {
         return { g in
             f(self, g)
         }
@@ -163,7 +163,7 @@ public enum Result<T> {
 /**
     Provide a default value for failed results.
 */
-public func ?? <T> (result: Result<T>, @autoclosure defaultValue: () -> T) -> T {
+public func ?? <T> (result: Result<T>, defaultValue: @autoclosure() -> T) -> T {
     switch result {
     case .Success(let x): return x
     case .Error: return defaultValue()

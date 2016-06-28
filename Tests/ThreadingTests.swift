@@ -10,33 +10,33 @@ import Foundation
 import XCTest
 @testable import Interstellar
 
-func mainTest(expectation: XCTestExpectation?)(r: Result<String>, completion:(Result<String>->Void)) {
-    XCTAssertTrue(NSThread.isMainThread())
+func mainTest(_ expectation: XCTestExpectation?, _ r: Result<String>, completion:((Result<String>)->Void)) {
+    XCTAssertTrue(Thread.isMainThread())
     expectation?.fulfill()
 }
 
 class ThreadingTests: XCTestCase {
     func testShouldDispatchToMainQueue() {
-        let expectation = expectationWithDescription("thread called")
-        let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-        dispatch_async(queue) {
+        let expectation = self.expectation(withDescription: "thread called")
+        let queue = DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes.qosDefault)
+        queue.async {
             let s = Signal<String>()
             s.ensure(Thread.main)
                 .ensure(mainTest(expectation))
             s.update("hello")
         }
-        waitForExpectationsWithTimeout(0.1, handler: nil)
+        waitForExpectations(withTimeout: 0.1, handler: nil)
     }
     
     func testDispatchToSelectedQueue() {
-        let expectation = expectationWithDescription("thread called")
+        let expectation = self.expectation(withDescription: "thread called")
         let s = Signal<String>()
-        s.ensure(Thread.background)
+        _ = s.ensure(Thread.background)
         .subscribe { _ in
-            XCTAssertFalse(NSThread.isMainThread())
+            XCTAssertFalse(Thread.isMainThread())
             expectation.fulfill()
         }
         s.update("hello")
-        waitForExpectationsWithTimeout(0.1, handler: nil)
+        waitForExpectations(withTimeout: 0.1, handler: nil)
     }
 }

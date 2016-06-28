@@ -11,9 +11,9 @@ import XCTest
 import Interstellar
 
 class WaitingTests: XCTestCase {
-    func asyncOperation<T>(delay: Double)(t: T, completion: Result<T>->Void) {
-        let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-        Signal(t).delay(delay, queue: queue).subscribe(completion)
+    func asyncOperation<T>(_ delay: Double, t: T, completion: (Result<T>)->Void) {
+        let queue = DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes.qosDefault)
+        _ = Signal(t).delay(delay, queue: queue).subscribe(completion)
     }
     
     func fail<T>(t: T) throws -> T {

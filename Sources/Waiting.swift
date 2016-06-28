@@ -31,9 +31,9 @@ public struct TimeoutError: ErrorProtocol {
 
 #if os(Linux)
 #else
-internal extension NSTimeInterval {
-    var dispatchTime: dispatch_time_t {
-        return dispatch_time(DISPATCH_TIME_NOW, Int64(self * Double(NSEC_PER_SEC)))
+internal extension TimeInterval {
+    var dispatchTime: DispatchTime {
+        return DispatchTime.now() + Double(Int64(self * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
     }
 }
 #endif
@@ -45,16 +45,16 @@ public extension Signal {
         Wait until the signal updates the next time. This will block the current thread until there 
         is an error or a successfull value. In case of an error, the error will be thrown.
     */
-    public func wait(timeout: NSTimeInterval? = nil) throws -> T {
-        let group = dispatch_group_create()
+    public func wait(_ timeout: TimeInterval? = nil) throws -> T {
+        let group = DispatchGroup()
         var result: Result<T>?
-        dispatch_group_enter(group)
-        subscribe { r in
+        group.enter()
+        _ = subscribe { r in
             result = r
-            dispatch_group_leave(group)
+            group.leave()
         }
-        let timestamp = timeout.map{ $0.dispatchTime } ?? DISPATCH_TIME_FOREVER
-        if dispatch_group_wait(group, timestamp) != 0 {
+        let timestamp = timeout.map{ $0.dispatchTime } ?? DispatchTime.distantFuture
+        if group.wait(timeout: timestamp) == .TimedOut {
             throw TimeoutError()
         }
         switch result! {

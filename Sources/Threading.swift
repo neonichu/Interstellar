@@ -31,17 +31,17 @@ public final class Thread {
     #if os(Linux)
     #else
     /// Transform a signal to the main queue
-    public static func main<T>(a: Result<T>, completion: Result<T>->Void) {
-        queue(dispatch_get_main_queue())(a, completion)
+    public static func main<T>(_ a: Result<T>, completion: (Result<T>)->Void) {
+        queue(DispatchQueue.main)(a, completion)
     }
     #endif
     
     #if os(Linux)
     #else
     /// Transform the signal to a specified queue
-    public static func queue<T>(queue: dispatch_queue_t) -> (Result<T>, Result<T>->Void) -> Void {
+    public static func queue<T>(_ queue: DispatchQueue) -> (Result<T>, (Result<T>)->Void) -> Void {
         return { a, completion in
-            dispatch_async(queue){
+            queue.async{
                 completion(a)
             }
         }
@@ -51,9 +51,9 @@ public final class Thread {
     #if os(Linux)
     #else
     /// Transform the signal to a global background queue with priority default
-    public static func background<T>(a: Result<T>, completion: Result<T>->Void) {
-        let q = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-        dispatch_async(q) {
+    public static func background<T>(_ a: Result<T>, completion: (Result<T>)->Void) {
+        let q = DispatchQueue.global(attributes: DispatchQueue.GlobalAttributes.qosDefault)
+        q.async {
             completion(a)
         }
     }

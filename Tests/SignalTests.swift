@@ -20,11 +20,11 @@ class SignalTests: XCTestCase {
         }
     }
     
-    func identity(a: String) -> Result<String> {
+    func identity(_ a: String) -> Result<String> {
         return .Success(a)
     }
     
-    func asyncIdentity(a: String, completion: Result<String>->Void) {
+    func asyncIdentity(a: String, completion: (Result<String>)->Void) {
         completion(identity(a))
     }
     
@@ -54,12 +54,12 @@ class SignalTests: XCTestCase {
     
     func testSubscription() {
         let signal = Signal<String>()
-        let expectation = expectationWithDescription("subscription not completed")
-        signal.next { a in
-            expectation.fulfill()
+        let expectat = expectation(withDescription: "subscription not completed")
+        _ = signal.next { a in
+            expectat.fulfill()
         }
         signal.update(Result(success:"Hello"))
-        waitForExpectationsWithTimeout(0.2, handler: nil)
+        waitForExpectations(withTimeout: 0.2, handler: nil)
     }
     
     func testThrowingFunction() {
@@ -78,11 +78,11 @@ class SignalTests: XCTestCase {
         }
         
         let signal = Signal<Int>()
-        let expectation = expectationWithDescription("subscription not completed")
+        let expectat = expectation(withDescription: "subscription not completed")
         
-        signal.flatMap(throwing).error { _ in expectation.fulfill() }
+        _ = signal.flatMap(throwing).error { _ in expectat.fulfill() }
         signal.update(.Success(1))
         
-        waitForExpectationsWithTimeout(0.2, handler: nil)
+        waitForExpectations(withTimeout: 0.2, handler: nil)
     }
 }

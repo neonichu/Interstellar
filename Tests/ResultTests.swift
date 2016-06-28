@@ -11,7 +11,7 @@ import Interstellar
 
 class ResultTests: XCTestCase {
     
-    func greeter(subject: String) -> Result<String> {
+    func greeter(_ subject: String) -> Result<String> {
         if subject.characters.count > 0 {
             return .Success("Hello \(subject)")
         } else {
@@ -28,7 +28,7 @@ class ResultTests: XCTestCase {
         return a
     }
     
-    struct NastyError: ErrorType {}
+    struct NastyError: ErrorProtocol {}
     
     func testAccessingAValue() {
         let result = Result(success: "hello")
@@ -52,7 +52,7 @@ class ResultTests: XCTestCase {
         let error = NSError(domain: "", code: 0, userInfo: nil)
         let result = Result<String>(error: error)
         do {
-            try result.get()
+            _ = try result.get()
             XCTFail()
         } catch let e {
             XCTAssertEqual(e as NSError, error)
